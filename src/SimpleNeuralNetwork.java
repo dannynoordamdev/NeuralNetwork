@@ -131,11 +131,14 @@ public class SimpleNeuralNetwork {
 
     // Voorbeeld (aanpassen voor je eigen data)
     public static void main(String[] args) {
-        SimpleNeuralNetwork network = new SimpleNeuralNetwork(2, 3); // 2 input nodes, 3 hidden nodes
+        SimpleNeuralNetwork network = new SimpleNeuralNetwork(4, 3); // 2 input nodes, 3 hidden nodes
 
         // Trainingsdata (aanpassen)
-        double[][] data = {{0.1, 0.2}, {0.7, 0.9}, {0.3, 0.5}};
-        double[] targets = {0.4, 0.8, 0.6};
+        // double[][] data = {{0.1, 0.2}, {0.7, 0.9}, {0.3, 0.5}};
+        // double[] targets = {0.4, 0.8, 0.6};
+
+        String[][] data = {{"John", "180", "40", "Ja"}, {"Emily", "165", "35", "Nee"}, {"Sarah", "182", "37", "Ja"}, {"Karel", "205", "40", "Ja"}};
+        String[] targets = {"Man", "Vrouw", "Vrouw", "Man"};
 
         // Voorspelling doen met nieuwe data (aanpassen)
         double[] newInput = {0.4, 0.6};

@@ -3,8 +3,8 @@ import java.util.Random;
 public class SimpleNeuralNetwork {
     private final int inputSize;
     private final int hiddenSize;
-    private final double[][] weights1; // weights tussen input en hidden layer
-    private final double[] weights2; // weights tussen hidden en output layer
+    private double[][] weights1; // weights tussen input en hidden layer
+    private double[] weights2; // weights tussen hidden en output layer
     private final double biasHidden; // bias voor hidden layer
     private final double biasOutput; // bias voor output layer
 
@@ -116,11 +116,13 @@ public class SimpleNeuralNetwork {
     }
 
     private void updateWeights(double[] weights1, double[] weights2) {
+        this.weights1 = new double[][]{weights1};
+        this.weights2 = weights2;
         // Update de interne gewichten van het netwerk
         // Dit is afhankelijk van hoe je de gewichten in je netwerk hebt opgeslagen.
         // Je zou de gewichten uit weights1 en weights2 kunnen kopiëren naar de interne gewichten van het netwerk.
     }
-
+    /*
     private double predict(double[] input, double[] weights1, double[] weights2) {
         // Bereken de uitvoer met de huidige gewichten
         // Dit is vergelijkbaar met de predict-methode in de oorspronkelijke code, maar hier gebruik je de gegeven gewichten.
@@ -128,7 +130,17 @@ public class SimpleNeuralNetwork {
         // Het bias kan ook worden opgenomen in de berekening, afhankelijk van hoe je de gewichten en biases hebt opgeslagen.
         return 0; // Tijdelijke waarde
     }
-
+     */
+    private double[] convertDataToDouble(String[][] data) {
+        double[] convertedData = new double[data.length * data[0].length];
+        int index = 0;
+        for (String[] row : data) {
+            for (String value : row) {
+                convertedData[index++] = Double.parseDouble(value);
+            }
+        }
+        return convertedData;
+    }
     // Voorbeeld (aanpassen voor je eigen data)
     public static void main(String[] args) {
         SimpleNeuralNetwork network = new SimpleNeuralNetwork(4, 3); // 2 input nodes, 3 hidden nodes
@@ -139,7 +151,9 @@ public class SimpleNeuralNetwork {
 
         String[][] data = {{"John", "180", "40", "Ja"}, {"Emily", "165", "35", "Nee"}, {"Sarah", "182", "37", "Ja"}, {"Karel", "205", "40", "Ja"}};
         String[] targets = {"Man", "Vrouw", "Vrouw", "Man"};
-
+        targets = network.convertDataToDouble(targets);
+        double[] convertedData = network.convertDataToDouble(data);
+        network.train(convertedData, targets, 10, 10);
         // Voorspelling doen met nieuwe data (aanpassen)
         double[] newInput = {0.4, 0.6};
         double prediction = network.predict(newInput);

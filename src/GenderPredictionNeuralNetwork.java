@@ -3,32 +3,40 @@ import java.util.Random;
 
 public class GenderPredictionNeuralNetwork {
     private int numInputNodes = 4; // Aantal input nodes (lengte, gewicht, leeftijd)
-    private int numHiddenNodes = 5; // Aantal nodes in de verborgen laag (door de student gekozen)
+    private int numHiddenNodes = 3; // Aantal nodes in de verborgen laag (door de student gekozen)
     private int numOutputNodes = 1; // Aantal output nodes (voorspelde gender)
     private double[] weightsInputToHidden;
     private double[] weightsHiddenToOutput;
+    private double[] hiddenOutputs; // Variabele om de uitvoer van de verborgen laag op te slaan
 
     public void setWeightsInputToHidden(double[] input){
         this.weightsInputToHidden = input;
     }
+
     public double[] getWeightsHiddenToOutput() {
         return weightsHiddenToOutput;
     }
+
     public void setWeightsHiddenToOutput(double[] input){
         this.weightsHiddenToOutput = input;
     }
+
     public double[] getWeightsInputToHidden() {
         return weightsInputToHidden;
     }
+
     public int getNumInputNodes() {
         return numInputNodes;
     }
+
     public int getNumHiddenNodes() {
         return numHiddenNodes;
     }
+
     public int getNumOutputNodes() {
         return numOutputNodes;
     }
+
     public GenderPredictionNeuralNetwork() {
         Random rand = new Random();
 
@@ -48,7 +56,7 @@ public class GenderPredictionNeuralNetwork {
 
     public double feedForward(double[] inputs) {
         // Berekeningen voor de verborgen laag
-        double[] hiddenOutputs = new double[numHiddenNodes];
+        hiddenOutputs = new double[numHiddenNodes]; // Initialisatie van hiddenOutputs
         for (int i = 0; i < numHiddenNodes; i++) {
             double sum = 0;
             for (int j = 0; j < numInputNodes; j++) {
@@ -68,7 +76,7 @@ public class GenderPredictionNeuralNetwork {
     private double sigmoid(double x) {
         return 1 / (1 + Math.exp(-x));
     }
-    /*
+
     public void train(double[][] inputs, double[] expectedOutputs, double learningRate, int epochs) {
         Random rand = new Random();
         for (int epoch = 0; epoch < epochs; epoch++) {
@@ -80,30 +88,28 @@ public class GenderPredictionNeuralNetwork {
                 double error = calculateError(predictedOutput, expectedOutput);
                 totalError += error;
 
-                // Gewichten aanpassen op basis van fout
+                // Aanpassen van de gewichten van de verborgen laag naar de uitvoerlaag
+                for (int j = 0; j < numHiddenNodes; j++) {
+                    double deltaOutput = (expectedOutput - predictedOutput) * predictedOutput * (1 - predictedOutput);
+                    weightsHiddenToOutput[j] += learningRate * deltaOutput * hiddenOutputs[j];
+                }
+
+                // Aanpassen van de gewichten van de invoerlaag naar de verborgen laag
                 for (int j = 0; j < numInputNodes; j++) {
                     for (int k = 0; k < numHiddenNodes; k++) {
-                        double sum = 0;
-                        for (int l = 0; l < numInputNodes; l++) {
-                            sum += input[l] * weightsInputToHidden[l * numHiddenNodes + k];
+                        double deltaHidden = 0;
+                        for (int l = 0; l < numOutputNodes; l++) {
+                            double deltaOutput = (expectedOutput - predictedOutput) * predictedOutput * (1 - predictedOutput);
+                            deltaHidden += deltaOutput * weightsHiddenToOutput[k * numOutputNodes + l] * hiddenOutputs[k] * (1 - hiddenOutputs[k]) * input[j];
                         }
-                        weightsInputToHidden[j * numHiddenNodes + k] += learningRate * error * input[j] * predictedOutput * (1 - predictedOutput) * weightsHiddenToOutput[k] * (1 - predictedOutput);
+                        weightsInputToHidden[j * numHiddenNodes + k] += learningRate * deltaHidden;
                     }
                 }
 
-                for (int j = 0; j < numHiddenNodes; j++) {
-                    double sum = 0;
-                    for (int k = 0; k < numInputNodes; k++) {
-                        sum += input[k] * weightsInputToHidden[k * numHiddenNodes + j];
-                    }
-                    weightsHiddenToOutput[j] += learningRate * error * predictedOutput * (1 - predictedOutput) * sum * (1 - predictedOutput);
-                }
             }
             System.out.println("Epoch " + epoch + ", Total Error: " + totalError);
         }
     }
-
-     */
 
     public double calculateError(double predicted, double actual) {
         return 0.5 * Math.pow((actual - predicted), 2);
@@ -122,19 +128,39 @@ public class GenderPredictionNeuralNetwork {
                 {140, 55, 25, 22}, // Vrouw
                 {195, 100, 35, 90}, // Man
                 {145, 63, 28, 5},  // Vrouw
-
                 // Voeg meer voorbeelden toe...
         };
-        double[] expectedOutputs = {1, 0, 1, 0, 1, 0, 1, 0, /* Labels voor de nieuwe voorbeelden... */}; // 1 voor man, 0 voor vrouw
+        double[] expectedOutputs = {1, 0, 1, 0, 1, 0, 1, 0}; // 1 voor man, 0 voor vrouw
 
-        //neuralNetwork.train(inputs, expectedOutputs, 0.00001, 1000);
+        int numHiddenNodes = neuralNetwork.getNumHiddenNodes();
+        double learningRate = 0.1;
+        int epochs = 1000;
+
+        neuralNetwork.train(inputs, expectedOutputs, learningRate, epochs);
+
+        int correctPredictions = 0;
 
         // Voorspel het geslacht voor nieuwe datapunten
         for (int i = 0; i < inputs.length; i++) {
             double[] input = inputs[i];
             double expectedGender = expectedOutputs[i];
             double predictedGender = neuralNetwork.feedForward(input);
-            System.out.println("Input: " + Arrays.toString(input) + ", Predicted Gender: " + predictedGender + ", Expected Gender: " + expectedGender);
+            String genderPrediction = (predictedGender <= 0.5) ? "vrouw" : "man";
+            String expectedGenderString = (expectedGender == 0) ? "vrouw" : "man";
+            System.out.println("Input: " + Arrays.toString(input) + ", Predicted Gender: " + genderPrediction + ", Expected Gender: " + expectedGenderString);
+
+            if ((predictedGender <= 0.5 && expectedGender == 0) || (predictedGender > 0.5 && expectedGender == 1)) {
+                correctPredictions++;
+            }
         }
+
+        double accuracy = ((double) correctPredictions / inputs.length) * 100;
+        System.out.println("Accuracy: " + accuracy + "%");
+        System.out.println("Number of Hidden Nodes: " + numHiddenNodes);
+        System.out.println("Learning Rate: " + learningRate);
+        System.out.println("Epochs: " + epochs);
     }
+
+
+
 }

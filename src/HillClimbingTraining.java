@@ -63,7 +63,7 @@ public class HillClimbingTraining {
         System.out.println(Arrays.toString(neuralNetwork.getWeightsInputToHidden()));
         System.out.println(Arrays.toString(neuralNetwork.getWeightsHiddenToOutput()));
 
-        double[][] inputs = {
+        double[][] training_inputs = {
                 {190, 120, 30, 100}, // Man
                 {160, 55, 25, 2}, // Vrouw
                 {185, 100, 35, 90}, // Man
@@ -73,22 +73,31 @@ public class HillClimbingTraining {
                 {195, 100, 35, 90}, // Man
                 {145, 63, 28, 5},  // Vrouw
         };
-        double[] expectedOutputs = {1, 0, 1, 0, 1, 0, 1, 0}; // 1 voor man, 0 voor vrouw
+        double[] training_outputs = {1, 0, 1, 0, 1, 0, 1, 0}; // 1 voor man, 0 voor vrouw
         // Train the neural network using hill climbing
-        hillClimbing.train(inputs, expectedOutputs, 1000, 0.01);
+        hillClimbing.train(training_inputs, training_outputs, 100, 0.06);
 
-        // Test the trained neural network
-        double[][] testInputs = {
-                {170, 70, 30, 0}, // Male
-                {160, 55, 25, 0}, // Female
-        };
-
-        for (int i = 0; i < testInputs.length; i++) {
-            double[] input = testInputs[i];
-            double predictedGender = neuralNetwork.feedForward(input);
-            System.out.println("Input: " + Arrays.toString(input) + ", Predicted Gender: " + predictedGender);
-        }
         System.out.println(Arrays.toString(neuralNetwork.getWeightsInputToHidden()));
         System.out.println(Arrays.toString(neuralNetwork.getWeightsHiddenToOutput()));
+
+        double[][] inputs = {
+                {130, 60, 30, 20}, // Vrouw
+                {160, 50, 25, 2}, // Vrouw
+                {195, 85, 35, 90}, // Man
+                {173, 63, 28, 14},  // Vrouw
+                {220, 110, 40, 100}, // Man
+                {150, 60, 25, 80}, // Man
+                {175, 100, 35, 85}, // Man
+                {150, 43, 28, 5},  // Vrouw
+        };
+        double[] expectedOutputs = {0, 0, 1, 0, 1, 1, 1, 0}; // 1 voor man, 0 voor vrouw
+
+        // Voorspel het geslacht voor nieuwe datapunten
+        for (int i = 0; i < inputs.length; i++) {
+            double[] input = inputs[i];
+            double expectedGender = expectedOutputs[i];
+            double predictedGender = neuralNetwork.feedForward(input);
+            System.out.println("Input: " + Arrays.toString(input) + ", Predicted Gender: " + predictedGender + ", Expected Gender: " + expectedGender);
+        }
     }
 }

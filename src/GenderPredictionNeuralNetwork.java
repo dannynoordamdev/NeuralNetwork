@@ -5,7 +5,6 @@ public class GenderPredictionNeuralNetwork {
     private int numInputNodes = 4; // Aantal input nodes (lengte, gewicht, leeftijd)
     private int numHiddenNodes = 5; // Aantal nodes in de verborgen laag (door de student gekozen)
     private int numOutputNodes = 1; // Aantal output nodes (voorspelde gender)
-
     private double[] weightsInputToHidden;
     private double[] weightsHiddenToOutput;
 

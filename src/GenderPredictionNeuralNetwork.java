@@ -90,7 +90,7 @@ public class GenderPredictionNeuralNetwork {
     }
 
     public void train(double[][] inputs, double[] expectedOutputs, double learningRate, int epochs) {
-        Random rand = new Random();
+        //Random rand = new Random();
         for (int epoch = 0; epoch < epochs; epoch++) {
             double totalError = 0.0;
             for (int i = 0; i < inputs.length; i++) {

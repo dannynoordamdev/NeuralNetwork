@@ -8,6 +8,27 @@ public class GenderPredictionNeuralNetwork {
     private double[] weightsInputToHidden;
     private double[] weightsHiddenToOutput;
 
+    public void setWeightsInputToHidden(double[] input){
+        this.weightsInputToHidden = input;
+    }
+    public double[] getWeightsHiddenToOutput() {
+        return weightsHiddenToOutput;
+    }
+    public void setWeightsHiddenToOutput(double[] input){
+        this.weightsHiddenToOutput = input;
+    }
+    public double[] getWeightsInputToHidden() {
+        return weightsInputToHidden;
+    }
+    public int getNumInputNodes() {
+        return numInputNodes;
+    }
+    public int getNumHiddenNodes() {
+        return numHiddenNodes;
+    }
+    public int getNumOutputNodes() {
+        return numOutputNodes;
+    }
     public GenderPredictionNeuralNetwork() {
         Random rand = new Random();
 
@@ -47,7 +68,7 @@ public class GenderPredictionNeuralNetwork {
     private double sigmoid(double x) {
         return 1 / (1 + Math.exp(-x));
     }
-
+    /*
     public void train(double[][] inputs, double[] expectedOutputs, double learningRate, int epochs) {
         Random rand = new Random();
         for (int epoch = 0; epoch < epochs; epoch++) {
@@ -82,7 +103,7 @@ public class GenderPredictionNeuralNetwork {
         }
     }
 
-
+     */
 
     public double calculateError(double predicted, double actual) {
         return 0.5 * Math.pow((actual - predicted), 2);
@@ -106,7 +127,7 @@ public class GenderPredictionNeuralNetwork {
         };
         double[] expectedOutputs = {1, 0, 1, 0, 1, 0, 1, 0, /* Labels voor de nieuwe voorbeelden... */}; // 1 voor man, 0 voor vrouw
 
-        neuralNetwork.train(inputs, expectedOutputs, 0.00001, 1000);
+        //neuralNetwork.train(inputs, expectedOutputs, 0.00001, 1000);
 
         // Voorspel het geslacht voor nieuwe datapunten
         for (int i = 0; i < inputs.length; i++) {
@@ -116,5 +137,4 @@ public class GenderPredictionNeuralNetwork {
             System.out.println("Input: " + Arrays.toString(input) + ", Predicted Gender: " + predictedGender + ", Expected Gender: " + expectedGender);
         }
     }
-
 }

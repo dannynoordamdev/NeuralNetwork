@@ -8,6 +8,9 @@ public class GenderPredictionNeuralNetwork {
     private double[] weightsInputToHidden;
     private double[] weightsHiddenToOutput;
     private double[] hiddenOutputs; // Variabele om de uitvoer van de verborgen laag op te slaan
+    private double bestError = Double.MAX_VALUE;
+    private double[] bestWeightsInputToHidden;
+    private double[] bestWeightsHiddenToOutput;
 
     public void setWeightsInputToHidden(double[] input){
         this.weightsInputToHidden = input;
@@ -38,20 +41,10 @@ public class GenderPredictionNeuralNetwork {
     }
 
     public GenderPredictionNeuralNetwork() {
-        Random rand = new Random();
-
-        // Initialisatie van gewichten
-        weightsInputToHidden = new double[numInputNodes * numHiddenNodes];
-        weightsHiddenToOutput = new double[numHiddenNodes * numOutputNodes];
-
-        // Willekeurige initialisatie van gewichten
-        for (int i = 0; i < numInputNodes * numHiddenNodes; i++) {
-            weightsInputToHidden[i] = rand.nextDouble() * 2 - 1; // Tussen -1 en 1
-        }
-
-        for (int i = 0; i < numHiddenNodes * numOutputNodes; i++) {
-            weightsHiddenToOutput[i] = rand.nextDouble() * 2 - 1; // Tussen -1 en 1
-        }
+        double[] hto = {0.17428701824981752, -0.5207287214486467, -0.5211525453346628};
+        setWeightsHiddenToOutput(hto);
+        double[] ith = {-0.32560788042573185, -0.8947579423251795, -0.9758304447841937, -0.017240487481357647, 0.31342305463621223, -0.49349010642855173, 0.5965522198802717, 0.7698250652609964, 0.282916928098244, 0.5313810433266788, 0.8835846735224344, -0.7542223395893735};
+        setWeightsInputToHidden(ith);
     }
 
     public double feedForward(double[] inputs) {
@@ -88,24 +81,47 @@ public class GenderPredictionNeuralNetwork {
                 double error = calculateError(predictedOutput, expectedOutput);
                 totalError += error;
 
-                // Aanpassen van de gewichten van de verborgen laag naar de uitvoerlaag
+                // Tijdelijk de gewichten opslaan
+                double[] tempWeightsInputToHidden = weightsInputToHidden.clone();
+                double[] tempWeightsHiddenToOutput = weightsHiddenToOutput.clone();
+
+                // Hill climbing voor de gewichten van de verborgen laag naar de uitvoerlaag
                 for (int j = 0; j < numHiddenNodes; j++) {
                     double deltaOutput = (expectedOutput - predictedOutput) * predictedOutput * (1 - predictedOutput);
                     weightsHiddenToOutput[j] += learningRate * deltaOutput * hiddenOutputs[j];
+
+                    // Controleren of de nieuwe oplossing beter is
+                    double newError = totalError + error;
+                    if (newError < bestError) {
+                        bestError = newError;
+                        bestWeightsHiddenToOutput = weightsHiddenToOutput.clone();
+                    } else {
+                        // Als de nieuwe oplossing niet beter is, herstellen we de gewichten
+                        weightsHiddenToOutput = tempWeightsHiddenToOutput.clone();
+                    }
                 }
 
-                // Aanpassen van de gewichten van de invoerlaag naar de verborgen laag
+                // Hill climbing voor de gewichten van de invoerlaag naar de verborgen laag
                 for (int j = 0; j < numInputNodes; j++) {
                     for (int k = 0; k < numHiddenNodes; k++) {
                         double deltaHidden = 0;
                         for (int l = 0; l < numOutputNodes; l++) {
                             double deltaOutput = (expectedOutput - predictedOutput) * predictedOutput * (1 - predictedOutput);
-                            deltaHidden += deltaOutput * weightsHiddenToOutput[k * numOutputNodes + l] * hiddenOutputs[k] * (1 - hiddenOutputs[k]) * input[j];
+                            deltaHidden += deltaOutput * bestWeightsHiddenToOutput[k * numOutputNodes + l] * hiddenOutputs[k] * (1 - hiddenOutputs[k]) * input[j];
                         }
                         weightsInputToHidden[j * numHiddenNodes + k] += learningRate * deltaHidden;
+
+                        // Controleren of de nieuwe oplossing beter is
+                        double newError = totalError + error;
+                        if (newError < bestError) {
+                            bestError = newError;
+                            bestWeightsInputToHidden = weightsInputToHidden.clone();
+                        } else {
+                            // Als de nieuwe oplossing niet beter is, herstellen we de gewichten
+                            weightsInputToHidden = tempWeightsInputToHidden.clone();
+                        }
                     }
                 }
-
             }
             System.out.println("Epoch " + epoch + ", Total Error: " + totalError);
         }
@@ -117,7 +133,8 @@ public class GenderPredictionNeuralNetwork {
 
     public static void main(String[] args) {
         GenderPredictionNeuralNetwork neuralNetwork = new GenderPredictionNeuralNetwork();
-
+        System.out.println("weightshiddentooutput: " + Arrays.toString(neuralNetwork.getWeightsHiddenToOutput()));
+        System.out.println("weightsinputtohidden: " + Arrays.toString(neuralNetwork.getWeightsInputToHidden()));
         // Trainingsdata (lengte, gewicht, leeftijd en bijbehorende gender en wat extras)
         double[][] inputs = {
                 {190, 120, 30, 100}, // Man
@@ -159,8 +176,9 @@ public class GenderPredictionNeuralNetwork {
         System.out.println("Number of Hidden Nodes: " + numHiddenNodes);
         System.out.println("Learning Rate: " + learningRate);
         System.out.println("Epochs: " + epochs);
+
+        // Sla de beste gewichten op
+        neuralNetwork.setWeightsInputToHidden(neuralNetwork.bestWeightsInputToHidden);
+        neuralNetwork.setWeightsHiddenToOutput(neuralNetwork.bestWeightsHiddenToOutput);
     }
-
-
-
 }

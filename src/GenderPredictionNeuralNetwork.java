@@ -61,6 +61,9 @@ public class GenderPredictionNeuralNetwork {
         for (int i = 0; i < numInputNodes * numHiddenNodes; i++) {
             weightsInputToHidden[i] = rand.nextDouble() - 0.5; // Willekeurige gewichten tussen -0.5 en 0.5
         }
+        // Remove randomness for testing stuff
+        weightsHiddenToOutput = new double[] {-0.2419814405500772, -0.4258861301218023, -0.20395764771837566};
+        weightsInputToHidden = new double[] {0.3462816638706523, -0.3768482517039504, 0.49991809061492376, -0.03487260530787195, -0.16831879557517182, -0.18590311350808109, -0.4040828389598421, 0.3475805938118687, 0.4549359689900563, 0.21627814379221388, -0.2826987358948527, -0.2675359244943599};
     }
 
     public double feedForward(double[] inputs) {
@@ -140,6 +143,8 @@ public class GenderPredictionNeuralNetwork {
     public static void main(String[] args) {
         GenderPredictionNeuralNetwork neuralNetwork = new GenderPredictionNeuralNetwork();
 
+        System.out.println(Arrays.toString(neuralNetwork.getWeightsHiddenToOutput()));
+        System.out.println(Arrays.toString(neuralNetwork.getWeightsInputToHidden()));
         // Trainingsdata (lengte, gewicht, leeftijd en bijbehorende gender)
         double[][] inputs = {
                 {190, 120, 30, 100}, // Man
@@ -154,7 +159,7 @@ public class GenderPredictionNeuralNetwork {
         };
         double[] expectedOutputs = {1, 0, 1, 0, 1, 0, 1, 0}; // 1 voor man, 0 voor vrouw
 
-        double learningRate = 0.01;
+        double learningRate = 0.05;
         int epochs = 1000;
 
         neuralNetwork.train(inputs, expectedOutputs, learningRate, epochs);
